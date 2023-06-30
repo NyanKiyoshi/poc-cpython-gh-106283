@@ -1,4 +1,4 @@
-# PoC CPython GH-10XXXX
+# PoC CPython GH-106283
 
 This repository contains a basic demonstration of a denial of service vulnerability
 of `socket.create_connection()` against untrusted user-inputs of domain names.
