@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  go-example:
+    build:
+      dockerfile: example-golang.Dockerfile
+      context: .
+    networks:
+      net:
+    entrypoint: sleep
+    command:
+      - inf
+    dns: 192.168.9.2
+    stop_grace_period: 0s
+    depends_on:
+      - bind
+  poc:
+    image: python:3.11.4-slim-buster
+    networks:
+      net:
+    entrypoint: sleep
+    command:
+      - inf
+    dns: 192.168.9.2
+    stop_grace_period: 0s
+    volumes:
+      - ./poc.py:/usr/bin/poc.py
+    depends_on:
+      - bind
+  bind:
+    image: ubuntu/bind9@sha256:89237cd97ea228fc8fc89f5339af3cdd268925537b8239677ad2110749ee9203
+    entrypoint: /usr/sbin/named
+    command: ["-fg"]
+    networks:
+      net:
+        ipv4_address: 192.168.9.2
+    dns: 127.0.0.1
+    ports:
+      - "127.0.0.1:30053:53/udp"
+      - "127.0.0.1:30053:53/tcp"
+    volumes:
+      - ./bind/named.conf:/etc/bind/named.conf
+      - ./bind/poc.zone:/etc/bind/poc.zone
+
+networks:
+  net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+       - subnet: 192.168.9.0/24
+         gateway: 192.168.9.1
